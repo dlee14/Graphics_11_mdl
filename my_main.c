@@ -43,11 +43,12 @@ void my_main() {
 
   int i;
   struct matrix *tmp;
+  struct matrix *transformations;
   struct stack *systems;
   screen t;
   zbuffer zb;
   color g;
-  double step_3d = 20;
+  double step_3d = 100;
   double theta;
 
   //Lighting values here for easy access
@@ -66,8 +67,8 @@ void my_main() {
   light[LOCATION][1] = 0.75;
   light[LOCATION][2] = 1;
 
-  light[COLOR][RED] = 0;
-  light[COLOR][GREEN] = 255;
+  light[COLOR][RED] = 100;
+  light[COLOR][GREEN] = 100;
   light[COLOR][BLUE] = 255;
 
   view[0] = 0;
@@ -135,29 +136,29 @@ void my_main() {
           break;
 
         case MOVE:
-          tmp = make_translate(op[i].op.move.d[0], op[i].op.move.d[1], op[i].op.move.d[2]);
-          matrix_mult(peek(systems), tmp);
-          copy_matrix(tmp, peek(systems));
-          free_matrix(tmp);
+          transformations = make_translate(op[i].op.move.d[0], op[i].op.move.d[1], op[i].op.move.d[2]);
+          matrix_mult(peek(systems), transformations);
+          copy_matrix(transformations, peek(systems));
+          free_matrix(transformations);
           break;
 
         case SCALE:
-          tmp = make_scale(op[i].op.move.d[0], op[i].op.move.d[1], op[i].op.move.d[2]);
-          matrix_mult(peek(systems), tmp);
-          copy_matrix(tmp, peek(systems));
-          free_matrix(tmp);
+          transformations = make_scale(op[i].op.move.d[0], op[i].op.move.d[1], op[i].op.move.d[2]);
+          matrix_mult(peek(systems), transformations);
+          copy_matrix(transformations, peek(systems));
+          free_matrix(transformations);
           break;
 
         case ROTATE:
-          theta = theta * (M_PI / 180);
-          if ( axis == 'x' )
-            tmp = make_rotX( theta );
-            else if ( axis == 'y' )
-            tmp = make_rotY( theta );
-            else
-            tmp = make_rotZ( theta );
-            matrix_mult(peek(csystems), tmp);
-            copy_matrix(tmp, peek(csystems));
+          if (op[i].op.rotate.axis == 0)
+            transformations = make_rotX(op[i].op.rotate.degrees * (M_PI / 180));
+          else if (op[i].op.rotate.axis == 1)
+            transformations = make_rotY(op[i].op.rotate.degrees * (M_PI / 180));
+          else
+            transformations = make_rotZ(op[i].op.rotate.degrees * (M_PI / 180));
+          matrix_mult(peek(systems), transformations);
+          copy_matrix(transformations, peek(systems));
+          free_matrix(transformations);
           break;
 
         case SAVE:
